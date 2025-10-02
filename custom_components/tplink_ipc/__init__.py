@@ -32,6 +32,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         password=password,
     )
 
+    try:
+        await hass.async_add_executor_job(api_client.sync_time)
+    except Exception as e:
+        pass
+        
+
     # Store clients in a data container
     camera_data = TPLinkCameraData(
         api_client=api_client, talkback_client=talkback_client

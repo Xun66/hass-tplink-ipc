@@ -2,6 +2,7 @@ import requests
 import hashlib
 import logging
 from typing import Dict, Any
+import time
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -17,6 +18,7 @@ class TPLinkIPCApiClient:
     PAYLOAD_GET_LENSMASK = {"method": "get", "lens_mask": {"name": ["lens_mask_info"]}}
     PAYLOAD_SET_LENSMASK_ON = {"method": "set", "lens_mask": {"lens_mask_info": {"enabled": "on"}}}
     PAYLOAD_SET_LENSMASK_OFF = {"method": "set", "lens_mask": {"lens_mask_info": {"enabled": "off"}}}
+    
 
     def __init__(self, host: str, username: str, password: str):
         if "http" in host:
@@ -113,3 +115,17 @@ class TPLinkIPCApiClient:
     def set_lens_mask_off(self) -> Dict[str, Any]:
         """Disable the lens mask (privacy off)."""
         return self.request(self.PAYLOAD_SET_LENSMASK_OFF)
+
+    def sync_time(self) -> Dict[str, Any]:
+        """Synchronize the camera time to the current system time (seconds from 1970)."""
+        current_timestamp = int(time.time())
+        payload = {
+            "method": "do",
+            "system": {
+                "boot_set_date": {
+                    "seconds_from_1970": current_timestamp
+                }
+            }
+        }
+        _LOGGER.info(f"Synchronizing camera time to timestamp: {current_timestamp}")
+        return self.request(payload)
